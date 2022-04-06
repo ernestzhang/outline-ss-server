@@ -33,7 +33,7 @@ type Client interface {
 // NewClient creates a client that routes connections to a Shadowsocks proxy listening at
 // `host:port`, with authentication parameters `cipher` (AEAD) and `password`.
 // TODO: add a dialer argument to support proxy chaining and transport changes.
-func NewClient(host string, port int, password, cipherName string) (Client, error) {
+func NewClient(host string, port int, password, cipherName string , tk string) (Client, error) {
 	// TODO: consider using net.LookupIP to get a list of IPs, and add logic for optimal selection.
 	proxyIP, err := net.ResolveIPAddr("ip", host)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewClient(host string, port int, password, cipherName string) (Client, erro
 	if err != nil {
 		return nil, err
 	}
-	d := ssClient{proxyIP: proxyIP.IP, proxyPort: port, cipher: cipher}
+	d := ssClient{proxyIP: proxyIP.IP, proxyPort: port, cipher: cipher , conn_tk: tk}
 	return &d, nil
 }
 
@@ -51,6 +51,7 @@ type ssClient struct {
 	proxyIP   net.IP
 	proxyPort int
 	cipher    *ss.Cipher
+	conn_tk string
 }
 
 // This code contains an optimization to send the initial client payload along with
