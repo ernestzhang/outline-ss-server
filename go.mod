@@ -1,4 +1,4 @@
-module github.com/Jigsaw-Code/outline-ss-server
+module github.com/ernestzhang/outline-ss-server
 
 require (
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7

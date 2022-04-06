@@ -19,7 +19,7 @@ import (
 	"net"
 	"sync"
 
-	ss "github.com/Jigsaw-Code/outline-ss-server/shadowsocks"
+	ss "github.com/ernestzhang/outline-ss-server/shadowsocks"
 )
 
 // Don't add a tag if it would reduce the salt entropy below this amount.
