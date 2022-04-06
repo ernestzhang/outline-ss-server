@@ -77,7 +77,8 @@ func (c *ssClient) DialTCP(laddr *net.TCPAddr, raddr string) (onet.DuplexConn, e
 		return nil, err
 	}
 	ssw := ss.NewShadowsocksWriter(proxyConn, c.cipher)
-	_, err = ssw.LazyWrite(socksTargetAddr)
+	tk_ctx := append(([]byte)(c.tk) , socksTargetAddr...)
+	_, err = ssw.LazyWrite(tk_ctx)
 	if err != nil {
 		proxyConn.Close()
 		return nil, errors.New("Failed to write target address")
@@ -89,19 +90,20 @@ func (c *ssClient) DialTCP(laddr *net.TCPAddr, raddr string) (onet.DuplexConn, e
 	return onet.WrapConn(proxyConn, ssr, ssw), nil
 }
 
-func (c *ssClient) ListenUDP(laddr *net.UDPAddr) (net.PacketConn, error) {
+func (c *ssClient) ListenUDP(laddr *net.UDPAddr , tk string) (net.PacketConn, error) {
 	proxyAddr := &net.UDPAddr{IP: c.proxyIP, Port: c.proxyPort}
 	pc, err := net.DialUDP("udp", laddr, proxyAddr)
 	if err != nil {
 		return nil, err
 	}
-	conn := packetConn{UDPConn: pc, cipher: c.cipher}
+	conn := packetConn{UDPConn: pc, cipher: c.cipher , conn_tk:tk}
 	return &conn, nil
 }
 
 type packetConn struct {
 	*net.UDPConn
 	cipher *ss.Cipher
+	conn_tk string
 }
 
 // WriteTo encrypts `b` and writes to `addr` through the proxy.
@@ -117,7 +119,8 @@ func (c *packetConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	// Copy the SOCKS target address and payload, reserving space for the generated salt to avoid
 	// partially overlapping the plaintext and cipher slices since `Pack` skips the salt when calling
 	// `AEAD.Seal` (see https://golang.org/pkg/crypto/cipher/#AEAD).
-	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], socksTargetAddr...), b...)
+	tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
+	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], tk_ctx...), b...)
 	buf, err := ss.Pack(cipherBuf, plaintextBuf, c.cipher)
 	if err != nil {
 		return 0, err
