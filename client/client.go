@@ -27,7 +27,7 @@ type Client interface {
 
 	// ListenUDP relays UDP packets though a Shadowsocks proxy.
 	// `laddr` is a local bind address, a local address is automatically chosen if nil.
-	ListenUDP(laddr *net.UDPAddr) (net.PacketConn, error)
+	ListenUDP(laddr *net.UDPAddr , tk string) (net.PacketConn, error)
 }
 
 // NewClient creates a client that routes connections to a Shadowsocks proxy listening at
