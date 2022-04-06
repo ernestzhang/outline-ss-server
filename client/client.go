@@ -90,13 +90,13 @@ func (c *ssClient) DialTCP(laddr *net.TCPAddr, raddr string) (onet.DuplexConn, e
 	return onet.WrapConn(proxyConn, ssr, ssw), nil
 }
 
-func (c *ssClient) ListenUDP(laddr *net.UDPAddr , tk string) (net.PacketConn, error) {
+func (c *ssClient) ListenUDP(laddr *net.UDPAddr) (net.PacketConn, error) {
 	proxyAddr := &net.UDPAddr{IP: c.proxyIP, Port: c.proxyPort}
 	pc, err := net.DialUDP("udp", laddr, proxyAddr)
 	if err != nil {
 		return nil, err
 	}
-	conn := packetConn{UDPConn: pc, cipher: c.cipher , conn_tk:tk}
+	conn := packetConn{UDPConn: pc, cipher: c.cipher , conn_tk:c.conn_tk}
 	return &conn, nil
 }
 
