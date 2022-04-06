@@ -119,7 +119,7 @@ func (c *packetConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	// Copy the SOCKS target address and payload, reserving space for the generated salt to avoid
 	// partially overlapping the plaintext and cipher slices since `Pack` skips the salt when calling
 	// `AEAD.Seal` (see https://golang.org/pkg/crypto/cipher/#AEAD).
-	//tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
+	tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
 	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], tk_ctx...), b...)
 	buf, err := ss.Pack(cipherBuf, plaintextBuf, c.cipher)
 	if err != nil {
