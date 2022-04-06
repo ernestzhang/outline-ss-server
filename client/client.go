@@ -77,7 +77,7 @@ func (c *ssClient) DialTCP(laddr *net.TCPAddr, raddr string) (onet.DuplexConn, e
 		return nil, err
 	}
 	ssw := ss.NewShadowsocksWriter(proxyConn, c.cipher)
-	tk_ctx := append(([]byte)(c.tk) , socksTargetAddr...)
+	tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
 	_, err = ssw.LazyWrite(tk_ctx)
 	if err != nil {
 		proxyConn.Close()
