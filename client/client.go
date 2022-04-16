@@ -35,6 +35,18 @@ type Client interface {
 // TODO: add a dialer argument to support proxy chaining and transport changes.
 func NewClient(host string, port int, password, cipherName string , tk string) (Client, error) {
 	// TODO: consider using net.LookupIP to get a list of IPs, and add logic for optimal selection.
+	tk_len := len(tk)
+	if tk_len != 32 && tk_len != 0 {
+		return nil, errors.New("token length must be 32 bytes or 0")
+	}
+	tk_bin := ""
+	if tk_len == 32 {
+		_tk_bin, err := hex.DecodeString(tk)
+		if err != nil {
+			return nil, errors.New("decode token failed")
+		}
+		tk_bin = string(_tk_bin)
+	}
 	proxyIP, err := net.ResolveIPAddr("ip", host)
 	if err != nil {
 		return nil, errors.New("Failed to resolve proxy address")
@@ -43,7 +55,7 @@ func NewClient(host string, port int, password, cipherName string , tk string) (
 	if err != nil {
 		return nil, err
 	}
-	d := ssClient{proxyIP: proxyIP.IP, proxyPort: port, cipher: cipher , conn_tk: tk}
+	d := ssClient{proxyIP: proxyIP.IP, proxyPort: port, cipher: cipher , conn_tk: tk_bin}
 	return &d, nil
 }
 
