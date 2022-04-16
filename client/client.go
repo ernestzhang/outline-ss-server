@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/hex"	
 	"errors"
 	"io"
 	"net"
