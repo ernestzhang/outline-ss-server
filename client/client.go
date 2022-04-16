@@ -77,8 +77,13 @@ func (c *ssClient) DialTCP(laddr *net.TCPAddr, raddr string) (onet.DuplexConn, e
 		return nil, err
 	}
 	ssw := ss.NewShadowsocksWriter(proxyConn, c.cipher)
-	tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
-	_, err = ssw.LazyWrite(tk_ctx)
+	err  = nil
+	if  len(c.conn_tk) > 0 {
+		tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
+		_, err = ssw.LazyWrite(tk_ctx)
+	}else{
+		_, err = ssw.LazyWrite(socksTargetAddr)
+	}
 	if err != nil {
 		proxyConn.Close()
 		return nil, errors.New("Failed to write target address")
@@ -119,8 +124,13 @@ func (c *packetConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	// Copy the SOCKS target address and payload, reserving space for the generated salt to avoid
 	// partially overlapping the plaintext and cipher slices since `Pack` skips the salt when calling
 	// `AEAD.Seal` (see https://golang.org/pkg/crypto/cipher/#AEAD).
-	tk_ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)
-	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], tk_ctx...), b...)
+	var  ctx []byte ;
+	if  len(c.conn_tk) > 0 {
+		ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)	
+	}else{
+		ctx :=  socksTargetAddr 
+	}
+	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], ctx...), b...)
 	buf, err := ss.Pack(cipherBuf, plaintextBuf, c.cipher)
 	if err != nil {
 		return 0, err
