@@ -126,9 +126,9 @@ func (c *packetConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	// `AEAD.Seal` (see https://golang.org/pkg/crypto/cipher/#AEAD).
 	var  ctx []byte ;
 	if  len(c.conn_tk) > 0 {
-		ctx := append(([]byte)(c.conn_tk) , socksTargetAddr...)	
+		ctx = append(([]byte)(c.conn_tk) , socksTargetAddr...)	
 	}else{
-		ctx :=  socksTargetAddr 
+		ctx =  socksTargetAddr 
 	}
 	plaintextBuf := append(append(cipherBuf[saltSize:saltSize], ctx...), b...)
 	buf, err := ss.Pack(cipherBuf, plaintextBuf, c.cipher)
